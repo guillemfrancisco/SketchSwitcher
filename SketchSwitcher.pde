@@ -1,10 +1,18 @@
+import hypermedia.net.*;
+
+UDP udp;
+byte[] data;
+int port = 6100; //Define the port you are expecting to receive the messages
+
 String currentSketch = "";
 String welcomeMessage = "Hello!";   //message displayed while the sketch isn't selected or when switching between sketches
 
 
 void setup() {
- fullScreen();
- 
+  fullScreen();
+   
+  udp = new UDP(this, port);
+  udp.listen(true);
 }
 
 
@@ -30,7 +38,8 @@ void openSketch() {
   
 }
 
-void closeSketch(){
+
+void closeSketch() {
   PrintWriter output=null;
   output = createWriter("closeSketch.bat");
   output.println("taskkill /FI \"WINDOWTITLE eq " + currentSketch + "\" /F");
@@ -39,4 +48,16 @@ void closeSketch(){
   output=null;
   launch(sketchPath("") + "closeSketch.bat");
   
+}
+
+
+void receive(byte[] data) {
+  String message = new String(data);
+  println(message);
+  
+  if(!message.equals(currentSketch)){
+     closeSketch();
+     currentSketch = message;
+     openSketch();
+  }
 }
